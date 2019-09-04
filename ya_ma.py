@@ -3,11 +3,11 @@ from json import loads
 
 import requests
 
-__version__      = "0.2.0"
-__author__       = "Rishat Askarov"
+__version__ = "0.2.0"
+__author__ = "Rishat Askarov"
 __author_email__ = "Rishatik92@gmail.com"
-__license__      = "MIT"
-__url__          = 'https://github.com/rishatik92/moscow_yandex_transport'
+__license__ = "MIT"
+__url__ = 'https://github.com/rishatik92/ya_ma'
 
 """ Yandex maps data requester"""
 
@@ -53,5 +53,19 @@ class YandexMapsRequester(object):
 
 
 if __name__ == '__main__':
-    client = YandexMapsRequester()
-    print(client.get_stop_info(9639579))
+    import sys
+    import getopt
+    argv = sys.argv[1:]
+    help_str = 'usage: python -m ya_ma -s <stop_id>'
+    try:
+        args = getopt.getopt(argv, 's:v')
+        arg,value  = args[0][0]
+        if arg == '-s' and value.isdigit():
+            client = YandexMapsRequester()
+            print(client.get_stop_info(value))
+        else:
+            print(help_str)
+
+    except getopt.GetoptError:
+        print(help_str)
+        sys.exit(2)
