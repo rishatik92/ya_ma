@@ -3,7 +3,7 @@ from json import loads
 
 import requests
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __author__ = "Rishat Askarov"
 __author_email__ = "Rishatik92@gmail.com"
 __license__ = "MIT"
@@ -55,16 +55,24 @@ class YandexMapsRequester(object):
 if __name__ == '__main__':
     import sys
     import getopt
+
     argv = sys.argv[1:]
-    help_str = 'usage: python -m ya_ma -s <stop_id>'
+    help_str = """usage: python -m ya_ma -s <stop_id>
+    
+    
+    ATTENTION, DON'T FLOOD WITH IT!,
+    Because YANDEX can block your freedom access. And you will be forced enter capcha every time when you want get data.
+    ВНИМАНИЕ - НЕ ПОСЫЛАЙТЕ ЗАПРОСЫ СЛИШКОМ ЧАСТО, иначе Яндекс будет перенаправлять Вас на страницу ввода капчи.
+    """
     try:
-        args = getopt.getopt(argv, 's:v')
-        arg,value  = args[0][0]
-        if arg == '-s' and value.isdigit():
-            client = YandexMapsRequester()
-            print(client.get_stop_info(value))
-        else:
-            print(help_str)
+        if len(argv) > 1:
+            args = getopt.getopt(argv, 's:v')
+            arg, value = args[0][0]
+            if arg == '-s' and value.isdigit():
+                client = YandexMapsRequester()
+                print(client.get_stop_info(value))
+                exit(0)
+        print(help_str)
 
     except getopt.GetoptError:
         print(help_str)

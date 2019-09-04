@@ -21,3 +21,8 @@ Example
     >>> client = YandexMapsRequester()
     >>> print(client.get_stop_info(9639579))
 
+Or you can use it in your shell:
+::
+
+    python -m ya_ma -s 9966346
+
