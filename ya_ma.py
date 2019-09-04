@@ -3,7 +3,7 @@ from json import loads
 
 import requests
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __author__ = "Rishat Askarov"
 __author_email__ = "Rishatik92@gmail.com"
 __license__ = "MIT"
