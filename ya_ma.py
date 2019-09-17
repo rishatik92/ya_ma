@@ -1,25 +1,33 @@
-import re
-from json import loads
 
-import requests
-
-__version__ = "0.3.1"
+""" Yandex maps data requester"""
+__version__ = "0.3.4"
 __author__ = "Rishat Askarov"
 __author_email__ = "Rishatik92@gmail.com"
 __license__ = "MIT"
 __url__ = 'https://github.com/rishatik92/ya_ma'
 
-""" Yandex maps data requester"""
+import requests
+import re
+from json import loads
 
+PARAMS = 'params'
+AJAX_KEY = 'ajax'
+LANG_KEY = 'lang'
+SESSION_KEY = "sessionId"
+CSRF_TOKEN_KEY = "csrfToken"
+ID_KEY = 'id'
+LOCALE_KEY = 'locale'
+MODE_KEY= 'mode'
+URI_KEY = "uri"
 RESOURCE = 'https://yandex.ru/maps/api/masstransit/getStopInfo'
+DEFAULT_USER_AGENT = "https://pypi.org/project/ya-ma"
 CONFIG = {
     'init_url': 'https://maps.yandex.ru',
     'uri': RESOURCE,
-    'params': {'ajax': 1, 'lang': 'en', 'locale': 'en_EN', 'mode': 'prognosis'},
-    'headers': {'User-Agent': "Chrome"}}
-SESSION_KEY = "sessionId"
-CSRF_TOKEN_KEY = "csrfToken"
+    'params': {AJAX_KEY: 1, LANG_KEY: 'ru', LOCALE_KEY: 'ru_RU', MODE_KEY: 'prognosis'},
+    'headers': {'User-Agent': DEFAULT_USER_AGENT}}
 
+SCHEMA = [AJAX_KEY, CSRF_TOKEN_KEY, ID_KEY, LANG_KEY, LOCALE_KEY, MODE_KEY, SESSION_KEY, URI_KEY]
 
 class YandexMapsRequester(object):
     def __init__(self, user_agent: str = None):
@@ -36,10 +44,15 @@ class YandexMapsRequester(object):
         """"
         get transport data for stop_id in json
         """
-        self._config["params"]["id"] = f"stop__{stop_id}"
-        req = requests.get(self._config["uri"], params=self._config["params"], cookies=self._config["cookies"],
+        self._config[PARAMS][ID_KEY] = f"stop__{stop_id}"
+        self._config[PARAMS][URI_KEY] = f"ymapsbm1://transit/stop?id=stop__{stop_id}"
+        req = requests.get(self._config["uri"], params=self._config[PARAMS], cookies=self._config["cookies"],
                            headers=self._config["headers"])
-        return loads(req.content.decode('utf8'))
+        result = req.content
+        try:
+            return loads(result.decode('utf8'))
+        except Exception as e:
+            return {"error": {"exception": e, "response": result}}
 
     def set_new_session(self):
         """
@@ -47,10 +60,16 @@ class YandexMapsRequester(object):
         """
         ya_request = requests.get(url=self._config["init_url"], headers=self._config["headers"])
         reply = ya_request.content.decode('utf8')
-        self._config["params"][CSRF_TOKEN_KEY] = re.search(f'"{CSRF_TOKEN_KEY}":"(\w+.\w+)"', reply).group(1)
+        self._config[PARAMS][CSRF_TOKEN_KEY] = re.search(f'"{CSRF_TOKEN_KEY}":"(\w+.\w+)"', reply).group(1)
         self._config["cookies"] = dict(ya_request.cookies)
-        self._config["params"][SESSION_KEY] = re.search(f'"{SESSION_KEY}":"(\d+.\d+)"', reply).group(1)
+        self._config[PARAMS][SESSION_KEY] = re.search(f'"{SESSION_KEY}":"(\d+.\d+)"', reply).group(1)
+        params = {}
+        self._config[PARAMS][URI_KEY] = None # init with none
+        self._config[PARAMS][ID_KEY] = None
 
+        for key in SCHEMA:
+            params[key] = self._config[PARAMS][key]
+        self._config[PARAMS] = params
 
 if __name__ == '__main__':
     import sys
