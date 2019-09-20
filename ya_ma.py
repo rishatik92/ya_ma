@@ -7,9 +7,10 @@ __author_email__ = "Rishatik92@gmail.com"
 __license__ = "MIT"
 __url__ = "https://github.com/rishatik92/ya_ma"
 
-import requests
+import json
 import re
-from json import loads
+
+import requests
 
 PARAMS = "params"
 AJAX_KEY = "ajax"
@@ -42,9 +43,10 @@ SCHEMA = [
 
 
 class YandexMapsRequester:
+    """Implementation of yandex maps api"""
+
     def __init__(self, user_agent: str = None):
         """
-
         :type user_agent: set user agent for data requester
         """
         self._config = CONFIG
@@ -66,9 +68,9 @@ class YandexMapsRequester:
         )
         result = req.content
         try:
-            return loads(result.decode("utf8"))
-        except Exception as e:
-            return {"error": {"exception": e, "response": result}}
+            return json.loads(result.decode("utf8"))
+        except json.JSONDecodeError as loads_reply_error:
+            return {"error": {"exception": loads_reply_error, "response": result}}
 
     def set_new_session(self):
         """
@@ -79,11 +81,11 @@ class YandexMapsRequester:
         )
         reply = ya_request.content.decode("utf8")
         self._config[PARAMS][CSRF_TOKEN_KEY] = re.search(
-            f'"{CSRF_TOKEN_KEY}":"(\w+.\w+)"', reply
+            rf'"{CSRF_TOKEN_KEY}":"(\w+.\w+)"', reply
         ).group(1)
         self._config["cookies"] = dict(ya_request.cookies)
         self._config[PARAMS][SESSION_KEY] = re.search(
-            f'"{SESSION_KEY}":"(\d+.\d+)"', reply
+            rf'"{SESSION_KEY}":"(\d+.\d+)"', reply
         ).group(1)
         params = {}
         self._config[PARAMS][URI_KEY] = None  # init with none
@@ -98,25 +100,24 @@ if __name__ == "__main__":
     import sys
     import getopt
 
-    argv = sys.argv[1:]
-    help_str = """usage: python -m ya_ma -s <stop_id>
-
-
+    ARGV = sys.argv[1:]
+    HELP_STR = """usage: python -m ya_ma -s <stop_id>
     ATTENTION, DON'T FLOOD WITH IT!,
     Because YANDEX can block your freedom access.
     And you will be forced enter capcha every time when you want get data.
-    ВНИМАНИЕ - НЕ ПОСЫЛАЙТЕ ЗАПРОСЫ СЛИШКОМ ЧАСТО, иначе Яндекс будет перенаправлять Вас на страницу ввода капчи.
+    ВНИМАНИЕ - НЕ ПОСЫЛАЙТЕ ЗАПРОСЫ СЛИШКОМ ЧАСТО, иначе 
+    Яндекс будет перенаправлять Вас на страницу ввода капчи.
     """
     try:
-        if len(argv) > 1:
-            args = getopt.getopt(argv, "s:v")
-            arg, value = args[0][0]
-            if arg == "-s" and value.isdigit():
-                client = YandexMapsRequester()
-                print(client.get_stop_info(value))
+        if len(ARGV) > 1:
+            ARGS = getopt.getopt(ARGV, "s:v")
+            ARG, VALUE = ARGS[0][0]
+            if ARG == "-s" and VALUE.isdigit():
+                CLIENT = YandexMapsRequester()
+                print(CLIENT.get_stop_info(VALUE))
                 exit(0)
-        print(help_str)
+        print(HELP_STR)
 
     except getopt.GetoptError:
-        print(help_str)
+        print(HELP_STR)
         sys.exit(2)
