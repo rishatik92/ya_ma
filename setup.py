@@ -1,14 +1,15 @@
-from   os.path    import dirname, join
+"""Building ya_ma project"""
+from os.path import dirname, join
 import re
-from   setuptools import setup
+from setuptools import setup
 
-with open(join(dirname(__file__), 'ya_ma.py'), encoding = "utf-8") as fp:
+with open(join(dirname(__file__), "ya_ma.py"), encoding="utf-8") as fp:
     for line in fp:
         m = re.search(r'^\s*__version__\s*=\s*([\'"])([^\'"]+)\1\s*$', line)
         if m:
             version = m.group(2)
             break
     else:
-        raise RuntimeError('Unable to find own __version__ string')
+        raise RuntimeError("Unable to find own __version__ string")
 
 setup(version=version)
