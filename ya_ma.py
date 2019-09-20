@@ -1,6 +1,6 @@
 
 """ Yandex maps data requester"""
-__version__ = "0.3.5"
+__version__ = "0.3.6"
 __author__ = "Rishat Askarov"
 __author_email__ = "Rishatik92@gmail.com"
 __license__ = "MIT"
