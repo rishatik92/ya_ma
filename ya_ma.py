@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Yandex maps data requester"""
 
-__version__ = "0.3.7"
+__version__ = "0.3.8"
 __author__ = "Rishat Askarov"
 __author_email__ = "Rishatik92@gmail.com"
 __license__ = "MIT"
@@ -49,7 +49,7 @@ class YandexMapsRequester:
         """
         :type user_agent: set user agent for data requester
         """
-        self._config = CONFIG
+        self._config = CONFIG.copy()  # need copy this dict
         if user_agent is not None:
             CONFIG["headers"]["User-Agent"] = user_agent
         self.set_new_session()
@@ -59,7 +59,8 @@ class YandexMapsRequester:
         get transport data for stop_id in json
         """
         self._config[PARAMS][ID_KEY] = f"stop__{stop_id}"
-        self._config[PARAMS][URI_KEY] = f"ymapsbm1://transit/stop?id=stop__{stop_id}"
+        uri = f"ymapsbm1://transit/stop?id=stop__{stop_id}"
+        self._config[PARAMS][URI_KEY] = uri
         req = requests.get(
             self._config["uri"],
             params=self._config[PARAMS],
@@ -91,7 +92,7 @@ class YandexMapsRequester:
         self._config[PARAMS][URI_KEY] = None  # init with none
         self._config[PARAMS][ID_KEY] = None
 
-        for key in SCHEMA:
+        for key in SCHEMA:  # according to the order
             params[key] = self._config[PARAMS][key]
         self._config[PARAMS] = params
 
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     ATTENTION, DON'T FLOOD WITH IT!,
     Because YANDEX can block your freedom access.
     And you will be forced enter capcha every time when you want get data.
-    ВНИМАНИЕ - НЕ ПОСЫЛАЙТЕ ЗАПРОСЫ СЛИШКОМ ЧАСТО, иначе 
+    ВНИМАНИЕ - НЕ ПОСЫЛАЙТЕ ЗАПРОСЫ СЛИШКОМ ЧАСТО, иначе
     Яндекс будет перенаправлять Вас на страницу ввода капчи.
     """
     try:
@@ -115,7 +116,7 @@ if __name__ == "__main__":
             if ARG == "-s" and VALUE.isdigit():
                 CLIENT = YandexMapsRequester()
                 print(CLIENT.get_stop_info(VALUE))
-                exit(0)
+                sys.exit(0)
         print(HELP_STR)
 
     except getopt.GetoptError:
